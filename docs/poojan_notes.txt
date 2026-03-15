@@ -1,0 +1,43 @@
+# CONNECTION BETWEEN CONFIGZ AND CONFIGZ-VALIDATOR
+configz-validator reads a .cfg file from tests/corpus/
+        ↓
+dynamically imports EOSParser from configz
+        ↓
+calls parser_instance.parse_bgp()  (or parse_ospf, parse_vrf, etc.)
+        ↓
+gets back list[BGPConfig]  (configz Pydantic model)
+        ↓
+calls .model_dump() → flat dict → compares to expected_fields
+        ↓
+emits parsing_error GapRecords if mismatch
+
+configz                                 configz-validator
+──────────────────────────────          ──────────────────────────────────────
+
+parsers/eos_parser.py                   phase0/gap_analyzer.py
+  EOSParser.parse_bgp()           ←──── ParserModelAnalyzerAgent inspects via
+                                         AST/MRO to find what fields it sets
+models/bgp.py
+  BGPConfig (Pydantic)            ←──── SemanticValidatorAgent.validate()
+                                         instantiates parser → calls parse_bgp()
+                                         → checks BGPConfig fields vs corpus
+
+                                        phase0/gap_analyzer.py
+                                         compares BGPConfig fields
+                                         against scraped vendor docs
+                                         → missing_attribute / dead_field gaps
+
+                                        VersionDiffAgent
+                                         compares two AttributeCatalogs
+                                         → version_gap gaps
+
+                                        GapReport → DB + per-gap JSON files
+                                        AlertManager stubs → (Phase 3: Slack/email)
+
+
+The Gap
+Right now configz-validator treats configz as a black-box dependency — it imports parsers and models but doesn't feed results back. The missing direction is:
+
+configz-validator → configz: When the validator finds gaps (e.g., EOSParser.parse_bgp() is inherited from IOSParser, or a field like neighbor_activate is never populated), there's no automated way to push those findings back as issues/PRs to fix the parser.
+
+That feedback loop — gap report → fix parser → re-validate — is what Phase 3/4 would close (LLM-assisted code generation + CI integration).

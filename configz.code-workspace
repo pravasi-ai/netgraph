@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../configz-validator"
+		}
+	],
+	"settings": {}
+}

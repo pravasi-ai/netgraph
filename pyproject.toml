@@ -1,0 +1,10 @@
+[project]
+name = "configz"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.11"
+dependencies = [
+    "ciscoconfparse2>=0.9.16",
+    "networkx>=3.6.1",
+    "pydantic>=2.12.5",
+]

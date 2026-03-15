@@ -1,0 +1,90 @@
+╭───────────────────────────────────────────────────────────────── Phase 3 Pipeline ──────────────────────────────────────────────────────────────────╮
+│ configz-validator Phase 3                                                                                                                           │
+│ Cycle ID: cycle3-0295138f                                                                                                                           │
+│ Vendor: arista eos  |  Parser: EOSParser                                                                                                            │
+│ Protocols: bgp  |  Version: 4.33.0F                                                                                                                 │
+│ Max fixes/protocol: 1  |  Min severity: high                                                                                                        │
+│ Gap types: dead_field, missing_attribute, parsing_error, syntax_mismatch                                                                            │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Step 1: Initialising database...
+  ✓ Database ready: output/validator.db
+──────────────────────────────────────────────────────────────────── Protocol: BGP ────────────────────────────────────────────────────────────────────
+
+Step 2: Scraping arista eos bgp docs...
+  Skipped — 66 attrs from DB
+
+Step 3: Analyzing EOSParser...
+  Skipped — from DB
+
+Step 4: Gap analysis...
+  [INHERITED_MISMATCH] parse_bgp() from IOSParser
+  [SYNTAX_MISMATCH] 1 known syntax differences detected
+  [MISSING_ATTRIBUTE] 51 CLI doc attributes not found in parser
+  [DEAD_FIELD] 56 model fields never populated by parser
+  ✓ 109 gaps
+
+Step 5: Semantic validation...
+[32m2026-03-10 20:03:03.205[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.208[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.209[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.210[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.211[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.211[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+  ✓ 2 examples  |  0 parsing_error gaps
+[32m2026-03-10 20:03:03.212[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+
+Step 7: Persisting 109 gaps...
+[32m2026-03-10 20:03:03.213[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.214[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.215[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.215[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.216[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.216[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.217[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.217[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.222[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.223[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.223[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.224[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.224[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.224[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.225[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.225[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.226[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.226[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.227[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.227[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.227[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.228[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+[32m2026-03-10 20:03:03.228[0m | [33m[1mWARNING [0m | [36mciscoconfparse2.ccp_abc[0m:[36mre_search_children[0m:[36m1583[0m - [33m[1mDEPRECATION WARNING - This method has been renamed BaseCfgLine().find_child_objects()[0m
+  ✓ Persisted
+
+Step 9: Selecting actionable gaps...
+  ✓ 1 gaps selected (from 109 total, filtered by type+severity)
+
+Step 10: Generating fixes for 1 gaps...
+  [1/1] EOS-BGP-SYNTAXMISMATCH-PEER_GROUP (syntax_mismatch, high)
+    ✓ attempt 1  |  syntax gate passed
+
+Step 11: Running validation gates...
+  ✓ EOS-BGP-SYNTAXMISMATCH-PEER_GROUP  |  ✓ syntax | ✓ semantic | ✗ lint_type | ✗ regression
+
+Step 12: Generating PR proposals for 1 fixes...
+  ✓ [EOS/BGP] fix syntax peer group (EOS-BGP-SYNTAXMISMATCH-PEER_GROUP)
+─────────────────────────────────────────────────────────────────── Phase 3 Summary ───────────────────────────────────────────────────────────────────
+                                           Code Generation Results                                            
+┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Protocol ┃ Gap ID                            ┃ Type            ┃ Status ┃ Attempts ┃ Failed Gates          ┃
+┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━┩
+│ bgp      │ EOS-BGP-SYNTAXMISMATCH-PEER_GROUP │ syntax_mismatch │ ✓ PASS │        1 │ lint_type, regression │
+└──────────┴───────────────────────────────────┴─────────────────┴────────┴──────────┴───────────────────────┘
+
+1 PR proposals generated:
+  •  [EOS/BGP] fix syntax peer group (EOS-BGP-SYNTAXMISMATCH-PEER_GROUP)
+
+  Written to: output/{protocol}/proposals/
+
+Generation: 1/1 succeeded
+LLM calls: 0  |  Tokens: 0↑ 0↓  |  Est. cost: $0.0000
+Total duration: 15.8s  |  Cycle ID: cycle3-0295138f
