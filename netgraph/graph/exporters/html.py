@@ -76,7 +76,7 @@ class HTMLExporter(BaseExporter):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>configz — {hostname}</title>
+<title>netgraph — {hostname}</title>
 <script>{cytoscape_js}</script>
 <style>
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
@@ -336,7 +336,7 @@ body {{
 
 <div id="sidebar">
   <div id="sidebar-header">
-    <h1>configz</h1>
+    <h1>netgraph</h1>
     <div class="meta">
       <strong>{hostname}</strong> &nbsp;·&nbsp; {os_type.upper()}<br>
       {node_count} nodes &nbsp;·&nbsp; {edge_count} edges<br>
@@ -505,11 +505,57 @@ body {{
         'border-opacity': 1,
       }}
     }},
+    {{
+      selector: 'edge.highlighted',
+      style: {{
+        'line-color': '#1d4ed8',
+        'target-arrow-color': '#1d4ed8',
+        'opacity': 1,
+        'width': 2.5,
+        'z-index': 9999,
+      }}
+    }},
+    {{
+      selector: 'node[?isCompound]',
+      style: {{
+        'background-color': '#f8fafc',
+        'background-opacity': 0.45,
+        'border-width': 1,
+        'border-color': '#cbd5e1',
+        'border-style': 'dashed',
+        'label': 'data(label)',
+        'font-size': '10px',
+        'font-weight': '700',
+        'text-valign': 'top',
+        'text-halign': 'center',
+        'color': '#94a3b8',
+        'padding': '20px',
+        'shape': 'roundrectangle',
+      }}
+    }},
   ].concat(statusStyleRules);
+
+  // ── Compound parent nodes (one container per group) ─────────────────────────
+  const groupLabels = {{
+    routing: 'Routing', policy: 'Policy', infrastructure: 'Infrastructure',
+    qos: 'QoS', security: 'Security', management: 'Management',
+    missing: 'Missing refs', other: 'Other',
+  }};
+  const groupsPresent = [...new Set(elements.nodes.map(n => n.data.group).filter(Boolean))];
+  const compoundNodes = groupsPresent.map(g => ({{
+    data: {{ id: `__grp_${{g}}`, label: groupLabels[g] || g, isCompound: true, group: g }}
+  }}));
+  const augmentedElements = {{
+    nodes: compoundNodes.concat(elements.nodes.map(n => ({{
+      ...n,
+      data: {{ ...n.data, parent: `__grp_${{n.data.group || 'other'}}` }},
+    }}))),
+    edges: elements.edges,
+  }};
 
   const cy = cytoscape({{
     container: document.getElementById('cy'),
-    elements: elements,
+    elements: augmentedElements,
     style: baseStyles,
     layout: {{ name: 'cose', animate: false, randomize: true, padding: 40 }},
     wheelSensitivity: 0.3,
@@ -517,9 +563,9 @@ body {{
 
   // ── Stats ───────────────────────────────────────────────────────────────────
   function updateStats() {{
-    const visible = cy.nodes(':visible').length;
-    const orphans = cy.nodes('[status = "orphan"]').length;
-    const missing = cy.nodes('[status = "missing"]').length;
+    const visible = cy.nodes('[!isCompound]:visible').length;
+    const orphans = cy.nodes('[!isCompound][status = "orphan"]').length;
+    const missing = cy.nodes('[!isCompound][status = "missing"]').length;
     const dangling = cy.edges('[resolved = false]').length;
     document.getElementById('stat-visible').textContent = visible;
     document.getElementById('stat-orphan').textContent = orphans;
@@ -573,14 +619,18 @@ body {{
     document.querySelectorAll('#group-filters input[type=checkbox]').forEach(chk => {{
       if (!chk.checked) hidden.add(chk.dataset.group);
     }});
-    cy.nodes().forEach(n => {{
+    cy.nodes('[!isCompound]').forEach(n => {{
       if (hidden.has(n.data('group'))) {{
         n.hide(); n.connectedEdges().hide();
       }} else {{
         n.show();
       }}
     }});
-    // Re-show edges only if both endpoints are visible
+    // Show/hide compound containers based on whether any children are visible
+    cy.nodes('[?isCompound]').forEach(compound => {{
+      if (compound.children(':visible').length > 0) compound.show();
+      else compound.hide();
+    }});
     cy.edges().forEach(e => {{
       if (e.source().visible() && e.target().visible()) e.show();
       else e.hide();
@@ -602,12 +652,11 @@ body {{
   const searchCount = document.getElementById('search-count');
   searchInput.addEventListener('input', function() {{
     const q = this.value.trim().toLowerCase();
-    cy.nodes().removeClass('highlighted faded');
+    cy.elements().removeClass('highlighted faded');
     if (!q) {{ searchCount.textContent = ''; return; }}
-    const matched = cy.nodes().filter(n => n.data('label').toLowerCase().includes(q));
-    const unmatched = cy.nodes().not(matched);
+    const matched = cy.nodes('[!isCompound]').filter(n => n.data('label').toLowerCase().includes(q));
+    cy.nodes('[!isCompound]').not(matched).addClass('faded');
     matched.addClass('highlighted');
-    unmatched.addClass('faded');
     searchCount.textContent = matched.length + ' match' + (matched.length !== 1 ? 'es' : '');
   }});
 
@@ -630,10 +679,20 @@ body {{
   document.getElementById('tab-raw').addEventListener('click', function() {{ switchTab('raw'); }});
 
   cy.on('tap', 'node', function(evt) {{
-    const d = evt.target.data();
-    detailTitle.textContent = d.label || d.id;
+    const node = evt.target;
+    if (node.data('isCompound')) return;  // ignore compound container clicks
+    const d = node.data();
 
-    // Attributes tab
+    // ── Neighbourhood highlight ───────────────────────────────────────────────
+    cy.elements().removeClass('highlighted faded');
+    const hood = node.closedNeighborhood().not('[?isCompound]');
+    cy.elements('[!isCompound]').not(hood).addClass('faded');
+    hood.addClass('highlighted');
+    // Keep edges inside neighbourhood vivid
+    hood.connectedEdges().removeClass('faded').addClass('highlighted');
+
+    // ── Detail panel ──────────────────────────────────────────────────────────
+    detailTitle.textContent = d.label || d.id;
     detailAttrs.innerHTML = '';
     Object.entries(d).forEach(([k, v]) => {{
       if (SKIP_KEYS.has(k)) return;
@@ -642,11 +701,8 @@ body {{
       row.innerHTML = `<span class="detail-key">${{k}}</span><span class="detail-val">${{String(v)}}</span>`;
       detailAttrs.appendChild(row);
     }});
-
-    // Raw config tab
     const raw = d.raw_config || '';
     detailRaw.textContent = raw || '(no raw config available)';
-
     detailPanel.classList.add('visible');
     switchTab('attrs');
   }});
@@ -654,7 +710,7 @@ body {{
   cy.on('tap', function(evt) {{
     if (evt.target === cy) {{
       detailPanel.classList.remove('visible');
-      cy.nodes().removeClass('highlighted faded');
+      cy.elements().removeClass('highlighted faded');
       document.getElementById('search').value = '';
       searchCount.textContent = '';
     }}

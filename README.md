@@ -48,6 +48,10 @@ print(parsed.ospf_instances)
 
 VRF · BGP · OSPF · IS-IS · EIGRP · RIP · Route-maps · Prefix-lists · ACLs · Community lists · AS-path lists · Static routes · NTP · SNMP · Syslog · Banners · QoS · NAT · Crypto/IPsec · BFD · IP SLA · EEM · Object tracking · Multicast
 
+## Security & Privacy
+
+**Local-first by design.** netgraph never sends your config files anywhere. All parsing, graph generation, and analysis run entirely on your machine. The HTML output is a self-contained file with no external requests — no CDN, no analytics, no telemetry of any kind.
+
 ## Contributing
 
 Contributions welcome — new parsers, bug fixes, additional protocol coverage. See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) to get started.
