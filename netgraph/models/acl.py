@@ -1,8 +1,57 @@
 """Access Control List (ACL) configuration models."""
 
 from ipaddress import IPv4Address, IPv4Network
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 from netgraph.models.base import BaseConfigObject
+
+
+def _parse_acl_addr(addr: str | None, wildcard: str | None) -> IPv4Network | None:
+    """Convert an ACL address + wildcard mask into an IPv4Network.
+
+    Handles the four forms that appear in IOS/EOS/NX-OS/IOS-XR ACLs:
+
+    * ``any``               → 0.0.0.0/0
+    * ``host 10.0.0.1``     → 10.0.0.1/32
+    * ``10.0.0.0 0.0.0.255``  (addr + wildcard)  → 10.0.0.0/24
+    * ``10.0.0.0/24``       (CIDR, EOS style)    → 10.0.0.0/24
+
+    Returns ``None`` if the address cannot be parsed (e.g. named object-groups).
+    """
+    if not addr:
+        return None
+
+    addr = addr.strip()
+
+    if addr == "any":
+        return IPv4Network("0.0.0.0/0")
+
+    if addr.startswith("host "):
+        host_str = addr[5:].strip()
+        try:
+            return IPv4Network(f"{host_str}/32")
+        except ValueError:
+            return None
+
+    if "/" in addr:
+        try:
+            return IPv4Network(addr, strict=False)
+        except ValueError:
+            return None
+
+    # Plain IP — pair with wildcard mask if available
+    if wildcard:
+        try:
+            # Wildcard is the bitwise inverse of a subnet mask.
+            # IPv4Network accepts hostmask notation directly.
+            return IPv4Network(f"{addr}/{wildcard}", strict=False)
+        except ValueError:
+            pass
+
+    # Plain IP with no wildcard — treat as /32
+    try:
+        return IPv4Network(f"{addr}/32")
+    except ValueError:
+        return None
 
 
 class ACLEntry(BaseModel):
@@ -52,6 +101,23 @@ class ACLEntry(BaseModel):
         default=None,
         description="Comment/remark for this entry",
     )
+
+    @computed_field
+    @property
+    def source_network(self) -> IPv4Network | None:
+        """Source address as IPv4Network (None if unparseable).
+
+        Enables programmatic analysis such as overlap detection::
+
+            if entry_a.source_network.overlaps(entry_b.source_network): ...
+        """
+        return _parse_acl_addr(self.source, self.source_wildcard)
+
+    @computed_field
+    @property
+    def destination_network(self) -> IPv4Network | None:
+        """Destination address as IPv4Network (None if unparseable)."""
+        return _parse_acl_addr(self.destination, self.destination_wildcard)
 
 
 class ACLConfig(BaseConfigObject):
