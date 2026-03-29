@@ -23,7 +23,7 @@
 
 ## Configuration Syntax Support
 
-The parser is designed to handle the unified configuration syntax shared across IOS and IOS-XE platforms. The hierarchical block-based configuration structure (indent-based) has remained consistent across all versions, ensuring backward and forward compatibility.
+The parser handles the unified configuration syntax shared across IOS and IOS-XE. The hierarchical block-based (indent-based) structure is consistent across all versions.
 
 ### Key Syntax Notes
 - **Address Family Model:** Introduced in IOS 12.2(33)SRB, standardized in IOS 15.x and all IOS-XE
@@ -341,29 +341,408 @@ ip prefix-list <name> description <text>
 
 ---
 
+### 7. Static Routes
+
+#### Configuration Syntax
+```
+ip route [vrf <vrf-name>] <prefix> <mask> <next-hop> [<distance>] [tag <tag>] [name <name>] [track <obj>]
+```
+
+#### Parsed Attributes
+- ✅ Destination prefix + mask
+- ✅ Next-hop (IP address or exit interface)
+- ✅ VRF
+- ✅ Administrative distance
+- ✅ Tag
+- ✅ Name/description
+- ✅ Track object reference
+
+---
+
+### 8. Access Control Lists (ACLs)
+
+#### Configuration Syntax
+```
+ip access-list standard <name>
+  [<seq>] permit <source> [log]
+  [<seq>] deny <source> [log]
+
+ip access-list extended <name>
+  [<seq>] permit <protocol> <source> <destination> [log]
+  [<seq>] deny <protocol> <source> <destination> [log]
+```
+
+#### Parsed Attributes
+- ✅ ACL name
+- ✅ ACL type (standard/extended)
+- ✅ Sequence numbers
+- ✅ Action (permit/deny/remark)
+- ✅ Protocol (extended ACLs)
+- ✅ Source/destination (IP, wildcard)
+- ✅ Port operators (eq, range, gt, lt, neq)
+
+---
+
+### 9. BGP Community Lists
+
+#### Configuration Syntax
+```
+ip community-list standard <name> permit|deny <communities>
+ip community-list expanded <name> permit|deny <regex>
+```
+
+#### Parsed Attributes
+- ✅ Community-list name
+- ✅ Type (standard/expanded)
+- ✅ Action (permit/deny)
+- ✅ Community values or regex
+
+---
+
+### 10. BGP AS-Path Access Lists
+
+#### Configuration Syntax
+```
+ip as-path access-list <name> permit|deny <regex>
+```
+
+#### Parsed Attributes
+- ✅ AS-path list name
+- ✅ Action (permit/deny)
+- ✅ Regular expression
+
+---
+
+### 11. IS-IS
+
+#### Configuration Syntax
+```
+router isis [<tag>]
+  net <NET-address>
+  is-type level-1-2
+  passive-interface default
+  no passive-interface <interface>
+  redistribute connected [route-map <name>]
+```
+
+#### Parsed Attributes
+- ✅ Instance name/tag
+- ✅ NET address
+- ✅ IS-type (level-1, level-2, level-1-2)
+- ✅ Passive interfaces
+- ✅ Redistribution
+
+---
+
+### 12. EIGRP
+
+#### Configuration Syntax
+```
+router eigrp <as-number>
+  network <prefix> <wildcard>
+  no auto-summary
+  redistribute static [metric ...]
+  passive-interface <interface>
+```
+
+#### Parsed Attributes
+- ✅ AS number
+- ✅ Network statements
+- ✅ Auto-summary
+- ✅ Passive interfaces
+- ✅ Redistribution
+
+---
+
+### 13. RIP
+
+#### Configuration Syntax
+```
+router rip
+  version 2
+  network <network>
+  no auto-summary
+  passive-interface <interface>
+  redistribute static [metric <m>]
+```
+
+#### Parsed Attributes
+- ✅ Version
+- ✅ Network statements
+- ✅ Auto-summary
+- ✅ Passive interfaces
+- ✅ Redistribution
+
+---
+
+### 14. NTP
+
+#### Configuration Syntax
+```
+ntp server <ip> [prefer] [source <interface>] [key <key-id>] [vrf <vrf>]
+ntp peer <ip>
+ntp authenticate
+ntp authentication-key <key-id> md5 <key>
+ntp trusted-key <key-id>
+ntp source <interface>
+```
+
+#### Parsed Attributes
+- ✅ NTP servers (IP, prefer, source, key, VRF)
+- ✅ NTP peers
+- ✅ Authentication (enabled, keys, trusted keys)
+- ✅ Source interface
+
+---
+
+### 15. SNMP
+
+#### Configuration Syntax
+```
+snmp-server community <community> [RO|RW] [<acl>]
+snmp-server host <ip> version <ver> <community> [<traps>]
+snmp-server location <text>
+snmp-server contact <text>
+snmp-server enable traps
+```
+
+#### Parsed Attributes
+- ✅ Communities (string, access level, ACL)
+- ✅ Trap hosts (IP, version, community)
+- ✅ Location, contact
+- ✅ Trap types enabled
+
+---
+
+### 16. Syslog
+
+#### Configuration Syntax
+```
+logging host <ip> [transport <proto>] [port <port>]
+logging source-interface <interface>
+logging buffered <size> [<level>]
+logging trap <level>
+logging facility <facility>
+```
+
+#### Parsed Attributes
+- ✅ Log hosts (IP, transport, port)
+- ✅ Source interface
+- ✅ Buffered logging (size, level)
+- ✅ Trap level
+- ✅ Facility
+
+---
+
+### 17. Banners
+
+#### Configuration Syntax
+```
+banner motd ^C
+  <message text>
+^C
+banner login ^C ... ^C
+banner exec ^C ... ^C
+```
+
+#### Parsed Attributes
+- ✅ Banner type (motd/login/exec)
+- ✅ Banner text content
+
+---
+
+### 18. Line Configs
+
+#### Configuration Syntax
+```
+line con 0
+  logging synchronous
+  exec-timeout <min> <sec>
+line vty 0 4
+  access-class <acl> in
+  transport input ssh
+  login local
+```
+
+#### Parsed Attributes
+- ✅ Line type and range (con/vty/aux)
+- ✅ Exec-timeout
+- ✅ Logging synchronous
+- ✅ Access-class
+- ✅ Transport input/output
+- ✅ Login method
+
+---
+
+### 19. QoS (Class-Map / Policy-Map)
+
+#### Configuration Syntax
+```
+class-map match-any <name>
+  match dscp <value>
+  match access-group name <acl>
+  match protocol <protocol>
+
+policy-map <name>
+  class <class-name>
+    bandwidth percent <pct>
+    priority percent <pct>
+    set dscp <value>
+    police rate <bps>
+```
+
+#### Parsed Attributes
+- ✅ Class-map name, match type (match-any/match-all)
+- ✅ Match clauses (DSCP, ACL, protocol, IP precedence)
+- ✅ Policy-map name
+- ✅ Class entries (class name, bandwidth, priority, police, set actions)
+
+---
+
+### 20. NAT
+
+#### Configuration Syntax
+```
+ip nat inside source list <acl> interface <intf> overload
+ip nat inside source static <local-ip> <global-ip>
+ip nat pool <name> <start-ip> <end-ip> netmask <mask>
+interface <intf>
+  ip nat inside
+  ip nat outside
+```
+
+#### Parsed Attributes
+- ✅ NAT translations (static, dynamic, overload)
+- ✅ NAT pools
+- ✅ Inside/outside interface role
+
+---
+
+### 21. Crypto / IPsec
+
+#### Configuration Syntax
+```
+crypto isakmp policy <priority>
+  encryption <alg>
+  hash <alg>
+  authentication pre-share
+  group <dh-group>
+
+crypto ipsec transform-set <name> <transform> [<transform>]
+
+crypto map <name> <seq> ipsec-isakmp
+  set peer <ip>
+  set transform-set <name>
+  match address <acl>
+```
+
+#### Parsed Attributes
+- ✅ ISAKMP policies (priority, encryption, hash, auth, DH group)
+- ✅ IPsec transform sets
+- ✅ Crypto maps (peer, transform-set, ACL match)
+
+---
+
+### 22. BFD
+
+#### Configuration Syntax
+```
+bfd slow-timers <ms>
+interface <intf>
+  bfd interval <min-tx> min_rx <min-rx> multiplier <mult>
+```
+
+#### Parsed Attributes
+- ✅ BFD global slow-timers
+- ✅ Interface BFD (interval, min_rx, multiplier)
+
+---
+
+### 23. IP SLA
+
+#### Configuration Syntax
+```
+ip sla <operation-number>
+  icmp-echo <dest-ip> [source-ip <src-ip>]
+  frequency <seconds>
+ip sla schedule <op> life forever start-time now
+```
+
+#### Parsed Attributes
+- ✅ Operation number
+- ✅ Type (icmp-echo, udp-jitter, etc.)
+- ✅ Destination/source IP
+- ✅ Frequency
+- ✅ Schedule (life, start-time)
+
+---
+
+### 24. EEM Applets
+
+#### Configuration Syntax
+```
+event manager applet <name>
+  event syslog pattern "<pattern>"
+  action 1.0 cli command "show ip route"
+  action 2.0 syslog msg "<text>"
+```
+
+#### Parsed Attributes
+- ✅ Applet name
+- ✅ Event type and parameters
+- ✅ Action entries (sequence, type, parameters)
+
+---
+
+### 25. Object Tracking
+
+#### Configuration Syntax
+```
+track <object-id> interface <intf> line-protocol
+track <object-id> ip route <prefix> <mask> reachability
+track <object-id> ip sla <op> reachability
+```
+
+#### Parsed Attributes
+- ✅ Track object ID
+- ✅ Track type (interface, ip route, ip sla)
+- ✅ Tracked resource and state condition
+
+---
+
+### 26. Multicast
+
+#### Configuration Syntax
+```
+ip multicast-routing [distributed]
+interface <intf>
+  ip pim sparse-mode
+  ip igmp version <ver>
+  ip igmp join-group <group>
+ip pim rp-address <ip> [<acl>]
+ip pim bsr-candidate <intf>
+```
+
+#### Parsed Attributes
+- ✅ Multicast routing enabled
+- ✅ PIM mode per interface (sparse-mode, dense-mode, sparse-dense-mode)
+- ✅ IGMP version and static joins
+- ✅ RP address (static and BSR/auto-RP)
+
+---
+
 ## Parser Limitations and Future Enhancements
 
 ### Current Limitations
 1. **BGP Neighbor AF-specific attributes:** Neighbor activate/deactivate within address-families not captured
 2. **Confederation:** BGP confederation ID and peers not parsed
 3. **IPv6:** Limited IPv6 support (addresses parsed, but IPv6 prefix-lists, routing not fully tested)
-4. **IS-IS:** Not yet supported
-5. **Static routes:** Not yet supported
-6. **ACLs:** Access-lists not parsed (referenced by route-maps but not extracted)
-7. **Community-lists:** Not parsed
-8. **AS-path lists:** Not parsed
-9. **Multicast:** IGMP, PIM not parsed
-10. **QoS:** Policy-maps, class-maps not parsed
 
 ### Planned Enhancements
 - [ ] BGP confederation support
 - [ ] BGP graceful-restart attributes
 - [ ] OSPF virtual-links, sham-links
 - [ ] OSPF timers (SPF, LSA throttle)
-- [ ] IS-IS protocol support
-- [ ] Static route parsing
-- [ ] ACL parsing (standard, extended, named)
-- [ ] Community-list and AS-path list parsing
 - [ ] IPv6 routing protocol support (OSPFv3, BGP IPv6)
 
 ---
@@ -381,6 +760,26 @@ ip prefix-list <name> description <text>
 | VRRP | ✅ | ✅ | ✅ | ✅ |
 | Tunnel Interfaces | ✅ | ✅ | ✅ | ✅ |
 | Port-channel/EtherChannel | ✅ | ✅ | ✅ | ✅ |
+| Static Routes | ✅ | ✅ | ✅ | ✅ |
+| ACLs | ✅ | ✅ | ✅ | ✅ |
+| Community Lists | ✅ | ✅ | ✅ | ✅ |
+| AS-Path Lists | ✅ | ✅ | ✅ | ✅ |
+| IS-IS | ✅ | ✅ | ✅ | ✅ |
+| EIGRP | ✅ | ✅ | ✅ | ✅ |
+| RIP | ✅ | ✅ | ✅ | ✅ |
+| NTP | ✅ | ✅ | ✅ | ✅ |
+| SNMP | ✅ | ✅ | ✅ | ✅ |
+| Syslog | ✅ | ✅ | ✅ | ✅ |
+| Banners | ✅ | ✅ | ✅ | ✅ |
+| Line Configs | ✅ | ✅ | ✅ | ✅ |
+| QoS (class-map/policy-map) | ✅ | ✅ | ✅ | ✅ |
+| NAT | ✅ | ✅ | ✅ | ✅ |
+| Crypto/IPsec | ✅ | ✅ | ✅ | ✅ |
+| BFD | ✅ | ✅ | ✅ | ✅ |
+| IP SLA | ✅ | ✅ | ✅ | ✅ |
+| EEM Applets | ✅ | ✅ | ✅ | ✅ |
+| Object Tracking | ✅ | ✅ | ✅ | ✅ |
+| Multicast (PIM/IGMP) | ✅ | ✅ | ✅ | ✅ |
 
 Legend:
 - ✅ Fully supported by parser
@@ -429,6 +828,6 @@ uv run python test_ios_parser_detailed.py
 
 ---
 
-**Last Updated:** 2026-02-20
-**Parser Version:** 1.0.0
+**Last Updated:** 2026-03-28
+**Parser Version:** 1.1.0
 **Maintainer:** Configz Development Team

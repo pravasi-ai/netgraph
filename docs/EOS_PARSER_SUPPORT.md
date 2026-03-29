@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Arista EOS parser (`configz.parsers.eos_parser.EOSParser`) provides comprehensive parsing support for Arista EOS network device configurations. The parser inherits from `IOSParser` since EOS uses IOS-style syntax for most configurations, with specific overrides for EOS-specific syntax variations.
+The Arista EOS parser (`netgraph.parsers.eos_parser.EOSParser`) provides comprehensive parsing support for Arista EOS network device configurations. The parser inherits from `IOSParser` since EOS uses IOS-style syntax for most configurations, with specific overrides for EOS-specific syntax variations.
 
 ## Supported Versions
 
@@ -40,7 +40,7 @@ vrf instance <name>
 - Route-target import/export (with EVPN support)
 - Route-map import/export
 
-**Parsing Status:** ✅ Inherited from IOSParser (requires syntax adaptation - currently shows 0 VRFs)
+**Parsing Status:** ✅ Overridden — `parse_vrfs()` handles `vrf instance` syntax and EVPN route-targets
 
 **Documentation Source:** EOS 4.35.1F - VRF Configuration Guide
 
@@ -203,7 +203,7 @@ ip prefix-list <name>
 - Prefix with CIDR notation
 - ge/le modifiers
 
-**Parsing Status:** ✅ Inherited from IOSParser (requires CIDR adaptation - currently shows 0 prefix-lists)
+**Parsing Status:** ✅ Overridden — `parse_prefix_lists()` handles EOS hierarchical prefix-list syntax with CIDR notation
 
 **Documentation Source:** EOS 4.35.1F - ACLs and Route Maps
 
@@ -375,6 +375,32 @@ router isis <instance-name>
 
 ---
 
+### 12. Extended Protocol Support (Inherited from IOSParser)
+
+The following protocols use IOS-identical syntax in EOS and are parsed via IOSParser inheritance without modification:
+
+| Protocol | Parsing Status |
+|----------|---------------|
+| NTP | ✅ Inherited from IOSParser |
+| SNMP | ✅ Inherited from IOSParser |
+| Syslog | ✅ Inherited from IOSParser |
+| Banners | ✅ Inherited from IOSParser |
+| Line configs (con/vty) | ✅ Inherited from IOSParser |
+| QoS (class-map/policy-map) | ✅ Inherited from IOSParser |
+| NAT | ✅ Inherited from IOSParser |
+| Crypto/IPsec | ✅ Inherited from IOSParser |
+| BFD | ✅ Inherited from IOSParser |
+| IP SLA | ✅ Inherited from IOSParser |
+| EEM Applets | ✅ Inherited from IOSParser |
+| Object Tracking | ✅ Inherited from IOSParser |
+| Multicast (PIM/IGMP) | ✅ Inherited from IOSParser |
+| EIGRP | ✅ Inherited from IOSParser |
+| RIP | ✅ Inherited from IOSParser |
+
+See [IOS_PARSER_SUPPORT.md](IOS_PARSER_SUPPORT.md) for full syntax and attribute details for each of these protocols.
+
+---
+
 ## Version Compatibility Matrix
 
 | Feature | EOS 4.20+ | EOS 4.25+ | EOS 4.30+ | EOS 4.35+ | Notes |
@@ -409,48 +435,27 @@ The EOS parser inherits from `IOSParser` because:
 
 ### Overridden Methods
 
-The following methods are overridden for EOS-specific syntax:
-
-1. **`parse_static_routes()`** - CIDR notation and egress-vrf support
-2. **`parse_acls()`** - Optional "standard" keyword and auto-detection
-3. **`parse_community_lists()`** - Regexp keyword instead of standard/expanded
-4. **`parse_as_path_lists()`** - Identical to IOS (included for completeness)
-5. **`parse_isis()`** - Modern instance-based IS-IS syntax
-
-### Methods Requiring Adaptation
-
-Some inherited methods may need EOS-specific adaptations:
-
-1. **`parse_vrfs()`** - Should handle `vrf instance` vs `vrf definition`
-2. **`parse_prefix_lists()`** - Should handle CIDR notation in prefix-lists
+1. **`parse_vrfs()`** - Handles `vrf instance` syntax and EVPN route-targets
+2. **`parse_prefix_lists()`** - Handles EOS hierarchical prefix-list syntax with CIDR notation
+3. **`parse_static_routes()`** - CIDR notation and egress-vrf support
+4. **`parse_acls()`** - Optional "standard" keyword and auto-detection
+5. **`parse_community_lists()`** - Regexp keyword instead of standard/expanded
+6. **`parse_as_path_lists()`** - Identical to IOS (included for completeness)
+7. **`parse_isis()`** - Modern instance-based IS-IS syntax
 
 ---
 
 ## Known Limitations
 
-### Fixed Issues
-
-1. **VRF Parsing** - ✅ **FIXED**
-   - **Was:** Showed 0 VRFs because inherited IOSParser looked for `vrf definition`, but EOS uses `vrf instance`
-   - **Fix:** Overrode `parse_vrfs()` to handle EOS `vrf instance` syntax with EVPN route-targets
-   - **Result:** Now correctly parses all 3 VRFs (CUSTOMER_A, CUSTOMER_B, MGMT) with route-targets
-
-2. **Prefix-List Parsing** - ✅ **FIXED**
-   - **Was:** Showed 0 prefix-lists due to hierarchical structure in EOS config
-   - **Fix:** Overrode `parse_prefix_lists()` to handle EOS hierarchical prefix-list syntax with CIDR notation
-   - **Result:** Now correctly parses all 4 prefix-lists with all sequence entries
-
-### Current Gaps
-
 1. **Numbered ACLs** - Parser only handles named ACLs
    - **Impact:** Traditional numbered ACLs (1-99, 100-199) not supported
    - **Priority:** Low (EOS primarily uses named ACLs)
 
-4. **IPv6 Support** - Limited IPv6 parsing coverage
+2. **IPv6 Support** - Limited IPv6 parsing coverage
    - **Impact:** IPv6 configurations may not be fully captured
    - **Priority:** Medium
 
-5. **VXLAN/EVPN** - Not currently parsed
+3. **VXLAN/EVPN** - Not currently parsed
    - **Impact:** Data center fabric configurations not captured
    - **Priority:** High for DC deployments
 
@@ -460,8 +465,6 @@ Some inherited methods may need EOS-specific adaptations:
 2. **Management API** - Parse `management api http-commands`
 3. **MLAG Configuration** - Parse MLAG peer and interface configs
 4. **VXLAN/EVPN** - Full VXLAN and EVPN configuration support
-5. **QoS Policies** - Parse QoS class-maps and policy-maps
-6. **AAA Configuration** - Parse authentication and authorization configs
 
 ---
 
@@ -500,16 +503,6 @@ Some inherited methods may need EOS-specific adaptations:
 ✅ AS-Path Lists: 2 parsed (6 total entries)
 ```
 
-### Validation Against Real Devices
-
-**Status:** Parser validated against sample configurations only
-
-**Recommendation:** Test against real EOS device configurations from:
-- EOS 4.30.x series
-- EOS 4.35.x series
-- Various hardware platforms (7050, 7280, 7500 series)
-- VXLAN/EVPN deployments
-
 ---
 
 ## Arista Documentation References
@@ -531,38 +524,13 @@ Some inherited methods may need EOS-specific adaptations:
    - Section 24.7 - ACL, Route Map, and Prefix List Commands
    - Section 33.4 - BGP Commands
 
-### Version-Specific Documentation
-
-- **EOS 4.30.0F** - Validated baseline version
-- **EOS 4.33.2F** - Reference documentation
-- **EOS 4.34.x** - Additional features validated
-- **EOS 4.35.1F** - Current reference version (January 2026)
-
----
-
-## Maintenance Notes
-
-### Last Updated
-- **Date:** February 21, 2026
-- **Parser Version:** Initial implementation
-- **Documentation Version:** EOS 4.35.1F
-
-### Update Frequency
-- **Recommended:** Quarterly review of EOS release notes
-- **Trigger:** Major EOS version releases (4.x.0F)
-- **Priority:** When new syntax or features are introduced
-
-### Contacts
-- **Arista Documentation:** https://www.arista.com/en/support/product-documentation
-- **EOS Release Notes:** https://www.arista.com/en/support/software-download
-
 ---
 
 ## Quick Reference
 
 ### Parser Class Location
 ```python
-from configz.parsers.eos_parser import EOSParser
+from netgraph.parsers.eos_parser import EOSParser
 
 parser = EOSParser(config_text)
 parsed = parser.parse()
@@ -570,7 +538,7 @@ parsed = parser.parse()
 
 ### Supported OS Type
 ```python
-from configz.models.base import OSType
+from netgraph.models.base import OSType
 
 os_type = OSType.EOS  # "eos"
 ```
@@ -584,3 +552,9 @@ samples/eos.txt  # EOS 4.30.1F sample configuration
 ```bash
 uv run python test_eos_parser.py
 ```
+
+---
+
+**Last Updated:** 2026-03-28
+**Parser Version:** 1.1.0
+**Documentation Version:** EOS 4.35.1F

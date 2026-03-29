@@ -1,0 +1,65 @@
+Target Audience: Engineering & System Architecture Team
+
+1. The Strategic Pivot
+We are transitioning our core Configuration Dependency Mapping engine into an open-source project. Our goal is to solve the "Trust Barrier" in enterprise networking by providing a transparent, vendor-agnostic tool that engineers can run locally without corporate "Red Tape."
+
+By open-sourcing the base UIR and Graph logic, we establish ourselves as the source of truth for network configuration logic before we upsell the Enterprise AI and Cross-Device Impact modules.
+
+2. The Core Value Proposition
+We are moving from a "Closed Management Platform" to a "Network Assurance Standard."
+
+The OS Tool: A local CLI that parses raw vendor configs and generates a visual/queryable dependency graph.
+
+The Hook: It identifies "Orphaned Objects" (defined but not used) and "Shadow Dependencies" (hidden links between ACLs, Route-Maps, and Interfaces).
+
+The Moat: Once the community adopts our UIR (Universal Intermediate Representation) as the standard for config-to-graph mapping, we own the ecosystem.
+
+3. Technical Implementation Plan
+Since the team has already developed the base parsing and UIR model, the focus now shifts to Distribution and Developer Experience (DX).
+
+A. The "Lightweight" Engine
+
+While our enterprise tier utilizes Neo4j for massive, multi-device topologies, the Open Source version must be Local-First.
+
+Tech Stack: Python 3.11+.
+
+In-Memory Graph: Use NetworkX for local graph processing to eliminate the need for an external database during the "trial" phase.
+
+Output Formats: The CLI must output:
+
+JSON: For programmatic integration.
+
+Static HTML: An interactive D3.js or Cytoscape visualization that opens in a browser.
+
+B. Functional Requirements
+
+Zero-Telemetry: For adoption in high-security environments, the tool must be strictly local. No data leaves the machine.
+
+Plugin-Based Parsers: The core should be decoupled from the vendor parsers. This allows the community to contribute "Cisco-legacy" or "Nokia" parsers without touching our core UIR logic.
+
+The "Linter" Mode: Implement a CLI flag --lint that checks for logic errors (e.g., an interface referencing a non-existent ACL).
+
+4. Developer Experience (DX) Goals
+To ensure rapid adoption by network operators, we must adhere to three rules:
+
+One-Command Install: pip install netgraph-core
+
+One-Command Execution: netgraph map ./my_config.txt
+
+Human-Readable Error Messages: If a parse fails, tell the user exactly which line of the vendor config broke the model.
+
+5. The "Upsell" Boundary (Internal Only)
+It is vital that the team understands where the "Open" ends and the "Enterprise" begins:
+
+Feature	NetGraph-Core (Open Source)	Enterprise (Proprietary)
+Data Model	Single Device UIR	Multi-Device Global Topology
+Database	In-Memory / NetworkX	Neo4j / High-Concurrency
+Logic	Syntax & Dependency Mapping	The "Nightmare Library" (Expert System)
+Interface	CLI / Static HTML	MCP-Powered AI Chat & Web UI
+Integrations	Local File System	ServiceNow, Jira, CI/CD Pipelines
+6. Immediate Next Steps for the Team
+Refactor: Decouple the current parser logic from any proprietary database connectors.
+
+Visualization: Create a prototype of the "Single-File HTML" output using the existing UIR data.
+
+CI/CD: Set up a public-ready GitHub repository structure (even if it’s currently private) with a focus on a "Docs-First" approach.

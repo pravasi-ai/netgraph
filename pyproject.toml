@@ -1,10 +1,17 @@
 [project]
-name = "configz"
+name = "netgraph"
 version = "0.1.0"
-description = "Add your description here"
+description = "Local-first network config dependency mapper — parse, visualize, and lint vendor configs"
 requires-python = ">=3.11"
 dependencies = [
     "ciscoconfparse2>=0.9.16",
     "networkx>=3.6.1",
     "pydantic>=2.12.5",
+    "click>=8.1",
 ]
+
+[project.scripts]
+netgraph = "netgraph.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["netgraph*"]
