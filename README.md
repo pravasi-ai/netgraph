@@ -22,6 +22,25 @@ Point it at a config file. It parses every protocol, builds a dependency graph, 
 | Cisco NX-OS | `NXOSParser` |
 | Arista EOS | `EOSParser` |
 
+## Try it instantly
+
+Pre-generated maps for all supported platforms — open any in your browser, no install needed:
+
+| Platform | Sample config | Interactive map |
+|---|---|---|
+| Cisco IOS | [samples/ios.txt](samples/ios.txt) | [examples/ios.html](examples/ios.html) |
+| Cisco IOS-XE | [samples/ios_xe.txt](samples/ios_xe.txt) | [examples/ios_xe.html](examples/ios_xe.html) |
+| Cisco IOS-XR | [samples/ios_xr.txt](samples/ios_xr.txt) | [examples/ios_xr.html](examples/ios_xr.html) |
+| Cisco NX-OS | [samples/nxos.txt](samples/nxos.txt) | [examples/nxos.html](examples/nxos.html) |
+| Arista EOS | [samples/eos.txt](samples/eos.txt) | [examples/eos.html](examples/eos.html) |
+
+Or run against your own config:
+
+```bash
+uvx netgraph map your-router.txt --output-dir .
+open your-router.html
+```
+
 ## Install
 
 ```bash
